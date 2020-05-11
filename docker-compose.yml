@@ -3,7 +3,7 @@ services:
   database:
     image: mariadb
     volumes:
-      - /data/mysql:/var/lib/mysql
+      - ./mysql:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: fernando
       MYSQL_DATABASE: db_fernando
@@ -13,13 +13,13 @@ services:
   wordpress:
     image: wordpress:php7.3-fpm-alpine
     volumes:
-      - /data/html:/var/www/html
+      - ./html:/var/www/html
     depends_on:
       - database
     environment:
       WORDPRESS_DB_HOST: database
       MYSQL_ROOT_PASSWORD: fernando
-      WORDPRESS_DB_NAME: fernando
+      WORDPRESS_DB_NAME: db_fernando
       WORDPRESS_DB_USER: fernando
       WORDPRESS_DB_PASSWORD: fernando
       WORDPRESS_TABLE_PREFIX: wp_
@@ -28,8 +28,8 @@ services:
     restart: always
   nginx:
     volumes:
-      - nginx:/etc/nginx/conf.d
-      - /data/html:/var/www/html
+      - ./nginx:/etc/nginx/conf.d
+      - ./html:/var/www/html
     ports:
       - 8080:80
     links:
