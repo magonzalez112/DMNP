@@ -27,6 +27,7 @@ services:
       - database
     restart: always
   nginx:
+    image: nginx:alpine
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - ./html:/var/www/html
@@ -34,3 +35,4 @@ services:
       - 8080:80
     links:
       - wordpress
+    restart: always
