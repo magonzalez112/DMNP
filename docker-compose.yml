@@ -2,37 +2,47 @@ version: '3'
 services:
   database:
     image: mariadb
+    container_name: database
     volumes:
       - ./mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: fernando
-      MYSQL_DATABASE: db_fernando
-      MYSQL_USER: fernando
-      MYSQL_PASSWORD: fernando
-    restart: always
-  wordpress:
-    image: wordpress:php7.3-fpm-alpine
-    volumes:
-      - ./html:/var/www/html
+      MYSQL_ROOT_PASSWORD: contrasenaROOT
+      MYSQL_DATABASE: db_usuario
+      MYSQL_USER: usuario
+      MYSQL_PASSWORD: contrasena
+    restart: unless-stopped
+  phpmyadmin:
     depends_on:
       - database
-    environment:
-      WORDPRESS_DB_HOST: database
-      MYSQL_ROOT_PASSWORD: fernando
-      WORDPRESS_DB_NAME: db_fernando
-      WORDPRESS_DB_USER: fernando
-      WORDPRESS_DB_PASSWORD: fernando
-      WORDPRESS_TABLE_PREFIX: wp_
-    links:
-      - database
-    restart: always
-  nginx:
-    image: nginx:alpine
-    volumes:
-      - ./nginx:/etc/nginx/conf.d
-      - ./html:/var/www/html
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
     ports:
-      - 8080:80
+      - '8081:80'
+    environment:
+      PMA_HOST: database
+      MYSQL_ROOT_PASSWORD: contrasenaROOT
+  webserver:
+    build:
+      context: .
+      dockerfile: custom_nginx.dockerfile
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+     - ./nginx/conf.d:/etc/nginx/conf.d/
+     - ./html:/var/www
+    ports:
+     - "8080:80"
     links:
-      - wordpress
-    restart: always
+        - php
+    restart: unless-stopped
+  php:
+    image: php:7.4-fpm
+    container_name: php
+    working_dir: /var/www
+    volumes:
+     - ./html:/var/www
+    user: "101:101"
+    restart: unless-stopped
